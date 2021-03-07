@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      function throttle(fn, interval) {
+  // last为上一次触发回调的时间
+  let last = 0
+  
+  // 将throttle处理结果当作函数返回
+  return function () {
+      // 保留调用时的this上下文
+      let context = this
+      // 保留调用时传入的参数
+      let args = arguments
+      // 记录本次触发回调的时间
+      let now = +new Date()
+      
+      // 判断上次触发的时间和本次触发的时间差是否小于时间间隔的阈值
+      if (now - last >= interval) {
+      // 如果时间间隔大于我们设定的时间间隔阈值，则执行回调
+          last = now;
+          fn.apply(context, args);  // 必须保证这里的this指向触发事件的元素
+      }
+    }
+}
+
+// 用throttle来包装scroll的回调
+var func = (e)=>{
+  console.log("触发了点击事件");
+}
+
+const better_scroll = throttle(func, 3000);
+
+
+document.addEventListener('click', better_scroll)
+    </script>
+  </body>
+</html>
+
+
+function throttle(func, wait) {
+    var timeout, context, args, result;
+    var previous = 0;
+    var later = function() {
+        previous = +new Date();
+        timeout = null;
+        func.apply(context, args)
+    };
+    var throttled = function() {
+        var now = +new Date();
+        //下次触发 func 剩余的时间
+        var remaining = wait - (now - previous);
+        context = this;
+        args = arguments;
+         // 如果没有剩余的时间了或者你改了系统时间
+        if (remaining <= 0 || remaining > wait) {
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+            }
+            previous = now;
+            func.apply(context, args);
+        } else if (!timeout) {
+            timeout = setTimeout(later, remaining);
+        }
+    };
+    return throttled;
+}
